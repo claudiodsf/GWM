@@ -12,7 +12,7 @@ description = "Greedy Wavelet Method - Time domain response spectrum matching"
 readme = "README.md"
 license = {text = "MIT"}
 authors = [
-    {name = "Greedy Wavelet Method Contributors", email = ""}
+    {name = "Greedy Wavelet Method Contributors"}
 ]
 requires-python = ">=3.8"
 classifiers = [
