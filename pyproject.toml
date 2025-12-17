@@ -1,0 +1,70 @@
+[build-system]
+requires = [
+    "setuptools>=65.0",
+    "numpy>=1.26.4",
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "gwm"
+version = "2024.3.12.RIC2024"
+description = "Greedy Wavelet Method - Time domain response spectrum matching"
+readme = "README.md"
+license = {text = "MIT"}
+authors = [
+    {name = "Greedy Wavelet Method Contributors", email = ""}
+]
+requires-python = ">=3.8"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Fortran",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Scientific/Engineering :: Physics",
+]
+dependencies = [
+    "numpy~=1.26.4",
+    "scipy~=1.13.1",
+    "matplotlib~=3.9.2",
+    "PyQt5~=5.15.10",
+    "pillow~=10.4.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+    "black>=23.0",
+    "flake8>=6.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/your-org/gwm"
+Documentation = "https://github.com/your-org/gwm"
+Repository = "https://github.com/your-org/gwm.git"
+Issues = "https://github.com/your-org/gwm/issues"
+
+[tool.setuptools]
+packages = ["gwm"]
+
+[tool.setuptools.package-data]
+gwm = ["resources/*", "fsrc/**/*"]
+
+[tool.black]
+line-length = 100
+target-version = ['py38', 'py39', 'py310', 'py311', 'py312']
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"
+addopts = "-v"
