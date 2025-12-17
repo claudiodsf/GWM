@@ -4,6 +4,7 @@
 *.mod
 *.so
 .vscode
+*.egg-info
 
 # Ignore these folders
 __pycache__/
