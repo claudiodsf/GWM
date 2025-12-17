@@ -19,9 +19,39 @@ class F2pyBuildExt(build_ext):
     """Custom build_ext command to compile Fortran code using f2py"""
     
     def build_extension(self, ext):
-        """Override build_extension to use f2py for Fortran compilation"""
-        # We handle compilation manually via f2py commands
-        pass
+        """Use f2py to compile each extension into its final location."""
+        mod_name = ext.name.rsplit(".", 1)[-1]
+        fsrc_dir = Path(__file__).parent / "gwm" / "fsrc"
+
+        # Resolve sources and flags per module
+        if mod_name == "_baseline":
+            source_files = [fsrc_dir / "baseline" / "baseline_lagrange_multipliers.f"]
+            extra_flags = None
+        elif mod_name == "_equtils":
+            source_files = [
+                fsrc_dir / "equtils" / "smooth.f90",
+                fsrc_dir / "equtils" / "taper.f90",
+                fsrc_dir / "equtils" / "butterworth.f90",
+                fsrc_dir / "equtils" / "zpa_clipping.f90",
+            ]
+            extra_flags = ['--f90flags=-fbounds-check', '--f90flags=-g']
+        elif mod_name == "_rs_time_openmp":
+            source_files = [fsrc_dir / "rs" / "exactmethod_time_openmp.f90"]
+            extra_flags = ['--f90flags=-fopenmp']
+            if platform.system() != "Windows":
+                extra_flags.extend(["-lgomp", "-lpthread"])
+            else:
+                extra_flags.extend(["-lgomp", "-lpthread"])
+        else:
+            raise RuntimeError(f"Unknown extension module: {ext.name}")
+
+        # Destination directory for the built extension (.so/.pyd)
+        dest_path = Path(self.get_ext_fullpath(ext.name))
+        dest_dir = dest_path.parent
+        dest_dir.mkdir(parents=True, exist_ok=True)
+
+        # Compile directly into the destination directory
+        self._run_f2py(mod_name, source_files, extra_flags=extra_flags, work_dir=dest_dir)
     
     def run(self):
         """Run custom f2py compilation"""
@@ -36,23 +66,11 @@ class F2pyBuildExt(build_ext):
                 "  - Mac: brew install gcc\n"
                 "  - Windows: Install MinGW-w64 or use pre-built binaries"
             )
-        
         print("\n" + "="*70)
         print("Building Fortran extensions with f2py")
         print("="*70 + "\n")
-        
-        # Build each Fortran extension
-        fsrc_dir = Path(__file__).parent / "gwm" / "fsrc"
-        
-        # 1. Build baseline module
-        self._build_baseline(fsrc_dir)
-        
-        # 2. Build equtils module
-        self._build_equtils(fsrc_dir)
-        
-        # 3. Build rs_time_openmp module
-        self._build_rs_time_openmp(fsrc_dir)
-        
+        # Delegate to default build_ext flow which calls build_extension per ext
+        super().run()
         print("\n" + "="*70)
         print("Fortran compilation completed successfully")
         print("="*70 + "\n")
@@ -74,12 +92,14 @@ class F2pyBuildExt(build_ext):
                 continue
         return False
     
-    def _run_f2py(self, module_name, source_files, extra_flags=None):
-        """Run f2py to compile Fortran files into the package dir (in-place)."""
-        # Compile directly into the source package directory so editable installs
-        # can import the built extension modules.
-        pkg_dir = Path(__file__).parent / "gwm"
-        pkg_dir.mkdir(parents=True, exist_ok=True)
+    def _run_f2py(self, module_name, source_files, extra_flags=None, work_dir=None):
+        """Run f2py to compile Fortran files into work_dir.
+
+        module_name: short module name like '_baseline'
+        work_dir: directory where the compiled extension will be emitted
+        """
+        out_dir = Path(work_dir) if work_dir else Path(self.build_lib) / "gwm"
+        out_dir.mkdir(parents=True, exist_ok=True)
 
         cmd = [
             sys.executable, "-m", "numpy.f2py",
@@ -104,42 +124,11 @@ class F2pyBuildExt(build_ext):
         
         print(f"\nCompiling {module_name}...")
         print(f"Command: {' '.join(cmd)}\n")
-        # Run in the package dir so the resulting .so is placed under gwm/
-        result = subprocess.run(cmd, cwd=str(pkg_dir))
+        # Run in target directory so resulting .so lands at the right place
+        result = subprocess.run(cmd, cwd=str(out_dir))
         if result.returncode != 0:
             raise RuntimeError(f"f2py compilation failed for {module_name}")
     
-    def _build_baseline(self, fsrc_dir):
-        """Build the baseline (Lagrange multipliers) module"""
-        source_files = [fsrc_dir / "baseline" / "baseline_lagrange_multipliers.f"]
-        self._run_f2py("_baseline", source_files)
-    
-    def _build_equtils(self, fsrc_dir):
-        """Build the equtils module"""
-        source_files = [
-            fsrc_dir / "equtils" / "smooth.f90",
-            fsrc_dir / "equtils" / "taper.f90",
-            fsrc_dir / "equtils" / "butterworth.f90",
-            fsrc_dir / "equtils" / "zpa_clipping.f90"
-        ]
-        # Separate f90 flags to avoid shell-quoted concatenation issues
-        extra_flags = ['--f90flags=-fbounds-check', '--f90flags=-g']
-        self._run_f2py("_equtils", source_files, extra_flags)
-    
-    def _build_rs_time_openmp(self, fsrc_dir):
-        """Build the rs_time_openmp module with OpenMP support"""
-        source_files = [fsrc_dir / "rs" / "exactmethod_time_openmp.f90"]
-        
-        # Add OpenMP flags based on platform
-        extra_flags = ['--f90flags=-fopenmp']
-        
-        # Add link flags for different platforms
-        if platform.system() != "Windows":
-            extra_flags.extend(["-lgomp", "-lpthread"])
-        else:
-            extra_flags.extend(["-lgomp", "-lpthread"])
-        
-        self._run_f2py("_rs_time_openmp", source_files, extra_flags)
 
 
 def get_long_description():
