@@ -1,0 +1,33 @@
+name: gwm
+channels:
+  - conda-forge
+  - defaults
+
+dependencies:
+  # Core Python
+  - python=3.11
+
+  # Numerical stack (pin to tested versions)
+  - numpy=1.26.4
+  - scipy=1.13.1
+  - matplotlib=3.9.2
+  - pillow=10.4.0
+
+  # GUI
+  - pyqt=5.15.11
+
+  # BLAS / LAPACK
+  - libopenblas
+  - blas=*=openblas
+
+  # Build toolchain for Fortran extensions
+  - compilers          # provides gfortran/clang toolchain (platform-specific)
+  - llvm-openmp        # OpenMP runtime (macOS/Linux)
+  - make
+  - pkg-config
+
+  # Optional: if you prefer MKL on Intel/AMD, replace openblas lines with mkl
+  # - mkl
+
+  # Keep pip available for editable install of this repo if desired
+  - pip

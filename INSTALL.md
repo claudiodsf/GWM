@@ -53,6 +53,20 @@ Pre-compiled .pyd files for Python 3.12 are included in `gwm/` folder. If you us
 
 ## Installation Methods
 
+### Method 0: Conda Environment (uses environment.yml)
+
+This installs all dependencies (including compilers/OpenBLAS) via conda, then installs GWM in editable mode.
+
+```bash
+cd /path/to/GWM
+conda env create -f environment.yml   # creates env "gwm"
+conda activate gwm
+pip install -e .
+python test_installation.py
+```
+
+If you prefer MKL on Intel/AMD, edit `environment.yml` and replace `libopenblas`/`blas=*=openblas` with `mkl` before creating the env.
+
 ### Method 1: Automatic Installation (Recommended)
 
 This method automatically installs all dependencies and compiles Fortran code.

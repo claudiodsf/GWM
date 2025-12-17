@@ -53,6 +53,18 @@ This document describes the cross-platform installation and build system for the
 
 ## Quick Start
 
+### Option 0: Conda env (environment.yml)
+
+```bash
+cd /path/to/GWM
+conda env create -f environment.yml   # creates env "gwm"
+conda activate gwm
+pip install -e .
+python test_installation.py
+```
+
+If you want MKL on Intel/AMD, edit `environment.yml` to use `mkl` instead of `libopenblas`/`blas=*=openblas` before creating the env.
+
 ### Option 1: Automatic Build (Recommended)
 
 ```bash
