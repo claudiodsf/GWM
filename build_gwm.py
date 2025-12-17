@@ -146,7 +146,8 @@ def build_all_extensions():
         fsrc_dir / "equtils" / "butterworth.f90",
         fsrc_dir / "equtils" / "zpa_clipping.f90"
     ]
-    equtils_flags = ['--f90flags="-fbounds-check -g"']
+    # Separate flags to avoid invalid concatenation in some gfortran builds
+    equtils_flags = ['--f90flags=-fbounds-check', '--f90flags=-g']
     if not build_fortran_extension("_equtils", equtils_sources, equtils_flags):
         print("✗ Failed to build _equtils module")
         success = False
@@ -158,7 +159,7 @@ def build_all_extensions():
     print("3. Building _rs_time_openmp module (response spectrum matching - OpenMP)")
     print("-"*70)
     rs_sources = [fsrc_dir / "rs" / "exactmethod_time_openmp.f90"]
-    rs_flags = ['--f90flags="-fopenmp"', '-lgomp', '-lpthread']
+    rs_flags = ['--f90flags=-fopenmp', '-lgomp', '-lpthread']
     if not build_fortran_extension("_rs_time_openmp", rs_sources, rs_flags):
         print("✗ Failed to build _rs_time_openmp module")
         success = False

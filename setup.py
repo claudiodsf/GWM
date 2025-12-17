@@ -121,7 +121,8 @@ class F2pyBuildExt(build_ext):
             fsrc_dir / "equtils" / "butterworth.f90",
             fsrc_dir / "equtils" / "zpa_clipping.f90"
         ]
-        extra_flags = ['--f90flags="-fbounds-check -g"']
+        # Separate f90 flags to avoid shell-quoted concatenation issues
+        extra_flags = ['--f90flags=-fbounds-check', '--f90flags=-g']
         self._run_f2py("_equtils", source_files, extra_flags)
     
     def _build_rs_time_openmp(self, fsrc_dir):
@@ -129,7 +130,7 @@ class F2pyBuildExt(build_ext):
         source_files = [fsrc_dir / "rs" / "exactmethod_time_openmp.f90"]
         
         # Add OpenMP flags based on platform
-        extra_flags = ['--f90flags="-fopenmp"']
+        extra_flags = ['--f90flags=-fopenmp']
         
         # Add link flags for different platforms
         if platform.system() != "Windows":
