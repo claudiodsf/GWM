@@ -150,7 +150,7 @@ def get_long_description():
 
 setup(
     name="gwm",
-    version="2024.3.12.RIC2024",
+    version="2024.3.12",
     author="Greedy Wavelet Method Contributors",
     description="Greedy Wavelet Method - Time domain response spectrum matching",
     long_description=get_long_description(),

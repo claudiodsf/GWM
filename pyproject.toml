@@ -7,7 +7,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "gwm"
-version = "2024.3.12.RIC2024"
+version = "2024.3.12"
 description = "Greedy Wavelet Method - Time domain response spectrum matching"
 readme = "README.md"
 license = {text = "MIT"}
