@@ -75,15 +75,16 @@ class F2pyBuildExt(build_ext):
         return False
     
     def _run_f2py(self, module_name, source_files, extra_flags=None):
-        """Run f2py to compile Fortran files"""
-        output_dir = Path(self.build_lib) / "gwm"
-        output_dir.mkdir(parents=True, exist_ok=True)
-        
+        """Run f2py to compile Fortran files into the package dir (in-place)."""
+        # Compile directly into the source package directory so editable installs
+        # can import the built extension modules.
+        pkg_dir = Path(__file__).parent / "gwm"
+        pkg_dir.mkdir(parents=True, exist_ok=True)
+
         cmd = [
             sys.executable, "-m", "numpy.f2py",
             "-c",
             "-m", module_name,
-            "--build-dir", str(output_dir)
         ]
         
         # Add compiler flags
@@ -103,8 +104,8 @@ class F2pyBuildExt(build_ext):
         
         print(f"\nCompiling {module_name}...")
         print(f"Command: {' '.join(cmd)}\n")
-        
-        result = subprocess.run(cmd, cwd=str(output_dir.parent))
+        # Run in the package dir so the resulting .so is placed under gwm/
+        result = subprocess.run(cmd, cwd=str(pkg_dir))
         if result.returncode != 0:
             raise RuntimeError(f"f2py compilation failed for {module_name}")
     
